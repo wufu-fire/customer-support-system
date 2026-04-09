@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: css-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: css
+      POSTGRES_PASSWORD: css_dev_password
+      POSTGRES_DB: customer_support
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - css_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U css -d customer_support"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: css-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    container_name: css-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio_dev_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - css_minio_data:/data
+
+volumes:
+  css_postgres_data:
+  css_minio_data:

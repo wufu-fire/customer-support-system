@@ -1,0 +1,14 @@
+{
+  "name": "customer-support-system",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:deps && npm run dev:apps",
+    "dev:apps": "concurrently -k -n api,web,admin -c cyan,green,magenta \"npm run start:dev --prefix apps/api\" \"npm run dev --prefix apps/web\" \"npm run dev --prefix apps/admin\"",
+    "dev:deps": "docker compose -f infra/docker/docker-compose.yml up -d",
+    "dev:stop": "docker compose -f infra/docker/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

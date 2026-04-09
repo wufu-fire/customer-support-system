@@ -1,0 +1,15 @@
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: grid;
+  gap: 16px;
+}
+
+.page-header {
+  text-align: left;
+}
+
+.result-alert {
+  margin-top: 12px;
+}
