@@ -40,8 +40,12 @@ type TrackTicketResponse = {
   latestPublicReply: string | null
 }
 
+const PROD_API_BASE_URL = 'https://api-production-e96d.up.railway.app/api/v1'
+const DEV_API_BASE_URL = 'http://localhost:3001/api/v1'
+
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001'
+  import.meta.env.VITE_API_BASE_URL ??
+  (import.meta.env.PROD ? PROD_API_BASE_URL : DEV_API_BASE_URL)
 
 type ApiErrorLike = {
   message?: string
