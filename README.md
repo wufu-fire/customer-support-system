@@ -87,4 +87,5 @@ npm run dev:stop
 - MVP development plan: [`docs/planning/mvp-development-plan.md`](docs/planning/mvp-development-plan.md)
 - Technical architecture (React + Ant Design + NestJS): [`docs/architecture/tech-architecture-react-antd-nestjs.md`](docs/architecture/tech-architecture-react-antd-nestjs.md)
 - MVP database design and table relationships: [`docs/database/mvp-database-design.md`](docs/database/mvp-database-design.md)
+- Release and environment governance (staging / production, step-by-playbook in §13): [`docs/maintenance/release-environment-governance.md`](docs/maintenance/release-environment-governance.md)
 - Notion MCP in Cursor: [`docs/maintenance/notion-cursor-setup.md`](docs/maintenance/notion-cursor-setup.md)
