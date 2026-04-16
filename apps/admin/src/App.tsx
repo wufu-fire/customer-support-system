@@ -3,7 +3,7 @@ import { Alert, Button, Card, Form, Input, Select, Space, Typography } from 'ant
 import './App.css'
 
 type UpdateTicketStatusPayload = {
-  toStatus: 'in_progress' | 'waiting_customer' | 'resolved' | 'closed'
+  toStatus: 'accepted' | 'in_progress' | 'resolved' | 'closed'
   comment?: string
   changedByAdminId?: string
 }
@@ -116,8 +116,8 @@ function App() {
           >
             <Select
               options={[
+                { label: 'accepted', value: 'accepted' },
                 { label: 'in_progress', value: 'in_progress' },
-                { label: 'waiting_customer', value: 'waiting_customer' },
                 { label: 'resolved', value: 'resolved' },
                 { label: 'closed', value: 'closed' },
               ]}
