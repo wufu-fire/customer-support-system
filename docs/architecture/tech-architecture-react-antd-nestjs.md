@@ -123,49 +123,78 @@ flowchart LR
   API --> Mail[邮件 API]
 ```
 
-#### 前台与管理端（Vite + React + Ant Design）
+#### 4.1.1 `apps/web` 部署方案（Vercel）
+
+- **项目形态**：Vite + React + Ant Design 前台站点，源码位于 `apps/web`。  
+- **环境拆分**（与发布治理文档一致）：  
+  - 预发 `staging`：Vercel Project（如 `css-web-staging`），Root Directory = `apps/web`，**Production Branch = `develop`**。  
+  - 线上 `production`：Vercel Project（如 `css-web-prod`），Root Directory = `apps/web`，**Production Branch = `main`**。  
+- **构建配置**：  
+  - Build Command：`npm run build`  
+  - Output Directory：`dist`  
+- **核心环境变量**：  
+  - `VITE_API_BASE_URL`：完整 API 根路径，预发指向 `https://<api-staging-host>/api/v1`，线上指向 `https://<api-prod-host>/api/v1`。  
+  - `VITE_DEFAULT_LOCALE`：默认语言，例如 `en-US`。  
+- **域名与 CORS 要求**：  
+  - Web 预发与线上使用不同域名（如 `staging.tailcarehub.com` / `tailcarehub.com`）。  
+  - 对应的 Railway API 环境仅在 `CORS_ORIGINS` 中列出本环境的 Web/Admin 域名。
+
+#### 4.1.2 `apps/admin` 部署方案（Vercel）
+
+- **项目形态**：Vite + React + Ant Design 管理后台，源码位于 `apps/admin`。  
+- **环境拆分**：  
+  - 预发：Vercel Project（如 `css-admin-staging`），Root Directory = `apps/admin`，Production Branch = `develop`。  
+  - 线上：Vercel Project（如 `css-admin-prod`），Root Directory = `apps/admin`，Production Branch = `main`。  
+- **构建配置**：同 `apps/web`，`npm run build` + `dist`。  
+- **核心环境变量**：  
+  - `VITE_API_BASE_URL`：与 Web 对应环境一致；预发/线上分别指向预发/线上 API。  
+  - 其他展示类变量按需增加，但不包含任何服务端密钥。  
+- **访问与安全建议**：  
+  - 管理端域名仅提供给内部用户，可结合 Vercel Password Protection、零信任访问或 VPN 做访问控制。  
+  - API 侧通过 `CORS_ORIGINS` + 鉴权（JWT / Session）限制来源与身份。
+
+#### 通用前端配置补充
 
 | 项 | 建议 |
 |----|------|
-| 构建命令 | 各应用目录内 `npm run build`（输出一般为 `dist/`） |
-| Output | **Static**；`vercel.json` 中配置 SPA 回退：`routes` 或 `rewrites` 将非文件请求指向 `index.html` |
-| 环境变量 | `VITE_API_BASE_URL`（或等价前缀）指向生产 API 的绝对 URL（如 `https://xxx.up.railway.app/api/v1`） |
-| 多环境 | Production / Preview：在 Vercel 项目 **Environment Variables** 中分别为 Production、Preview、Development 配置不同 `VITE_API_BASE_URL` |
+| SPA 回退 | 若使用 SPA 路由，可在 Vercel 或 `vercel.json` 中配置 `rewrites` 将非文件请求指向 `index.html` |
+| 环境变量管理 | 优先通过 Vercel 项目下的 Environment Variables 配置 `VITE_API_BASE_URL`，避免在仓库中存放真实地址 |
 | 自定义域名 | 在各自 Project 的 **Domains** 中绑定（如 `www.example.com` 与 `admin.example.com`） |
 
 ### 4.2 部署架构（服务端：Railway）
 
-Railway 以容器化常驻服务运行 NestJS，更适合当前 API 形态（`nest start` / `node dist/main`）与 Prisma 迁移流程：
+Railway 以容器化常驻服务运行 NestJS，更适合当前 API 形态（`nest start` / `node dist/main`）与 Prisma 迁移流程。
 
-| 项 | 说明 |
-|----|------|
-| Service Root Directory | `apps/api` |
-| Build Command | `npm ci && npm run build && npx prisma generate` |
-| Start Command | `npm run start:prod` |
-| 路由前缀 | Nest 保持 `API_PREFIX=/api/v1`，前端统一访问 `${VITE_API_BASE_URL}/tickets` 等路径 |
-| 数据库 | 同一 Railway Project 下添加 PostgreSQL，向 API 注入 `DATABASE_URL` |
-| 迁移策略 | 生产环境仅使用 `npx prisma migrate deploy`；不在生产执行 `migrate dev` |
-| 运行特征 | 常驻进程，适合当前 Nest 模块化 API 与后续队列/长任务扩展 |
+#### 4.2.1 `apps/api` 部署方案（Railway + PostgreSQL）
 
-#### 环境变量与安全（Railway API）
+- **Service Root Directory**：`apps/api`。  
+- **环境拆分**：  
+  - 预发 `api-staging`：绑定 Git 分支 `develop`，使用预发数据库 `postgres-staging`。  
+  - 线上 `api-prod`：绑定 Git 分支 `main`，使用生产数据库 `postgres-prod`。  
+- **构建命令**：`npm ci && npm run build && npx prisma generate`。  
+- **启动命令**：`npm run start:prod`（读取 Railway 注入的 `PORT`）。  
+- **路由前缀**：`API_PREFIX=/api/v1`，前端统一访问 `${VITE_API_BASE_URL}/tickets` 等路径。  
+- **数据库与迁移策略**：  
+  - 本地仅使用 `prisma migrate dev` 生成迁移文件，并提交到 `apps/api/prisma/migrations/*`。  
+  - 预发/线上在发布流程中使用 `npx prisma migrate deploy` 应用迁移；禁止在生产执行 `migrate dev`。  
+- **主要环境变量**（每个环境各自配置）：  
+  - `DATABASE_URL`、`API_PREFIX`、`NODE_ENV=production`、可选 `APP_ENV=staging|production`。  
+  - `CORS_ORIGINS`：仅列出对应环境的 Web/Admin 域名。  
+  - 其他敏感配置：对象存储密钥、邮件 API Key、`JWT_SECRET` 等，全部通过 Railway Variables 注入。
 
-- 在 **API Service** 中配置：`DATABASE_URL`、对象存储密钥、邮件 API Key、`JWT_SECRET`、`API_PREFIX`、`CORS_ORIGINS` 等；**勿**提交到仓库。
-- **CORS**：`CORS_ORIGINS` 填写 `web`、`admin` 的 Vercel 生产域（以及需要的 Preview 域）。
-- **端口**：Railway 自动注入 `PORT`，Nest 读取 `process.env.PORT` 启动。
+#### 4.2.2 Monorepo 在 Vercel + Railway 的配置要点
 
-#### Monorepo 在 Vercel + Railway 的配置要点
-
-- 在 Vercel 为 **web / admin** 各建一个 Project，**Root Directory** 分别设为 `apps/web`、`apps/admin`。
-- 在 Railway 为 **api** 建一个 Service，Root Directory 设为 `apps/api`，并添加 PostgreSQL。
-- **Install Command** 若在根目录安装依赖：`cd ../.. && npm ci`（按实际包管理器调整），或使用 Turborepo / pnpm workspace 的 `filter` 仅安装所需子图。
-- **Ignored Build Step**：可选，用于仅当对应路径变更时才构建（节省额度）。
+- Vercel：为 `apps/web`、`apps/admin` 各建一个 staging Project 和一个 production Project，通过 Root Directory + Production Branch 绑定到不同分支。  
+- Railway：为 `apps/api` 建立 staging/production Service 与各自独立 PostgreSQL，确保 `DATABASE_URL`、`VITE_API_BASE_URL`、`CORS_ORIGINS` 在环境之间完全隔离。  
+- 若在仓库根目录安装依赖，可在 Railway/Vercel 的 **Install Command** 中使用 `cd ../.. && npm ci` 等命令，或采用 pnpm/Turborepo 等 workspace 工具精细安装。  
+- 可根据变更路径配置「Ignore Build Step」或等价机制，以减少无关服务的构建与部署。
 
 #### Railway 数据库迁移（Prisma）
 
-1. 本地开发修改 schema 后，提交 `apps/api/prisma/migrations/*` 到仓库。
-2. Railway 部署时（具备生产 `DATABASE_URL` 的环境）执行：`npx prisma migrate deploy`。
-3. 推荐将迁移加入 Railway Release/Post-deploy 环节，确保每次发布自动应用未执行迁移。
-4. 禁止在生产环境执行 `npx prisma migrate dev`。
+1. 本地开发修改 schema 后，执行 `npm run prisma:migrate --prefix apps/api -- --name <描述>` 并提交生成的迁移文件。  
+2. 在预发 `api-staging` 的发布流程中执行 `npx prisma migrate deploy`，先对预发库验证迁移。  
+3. 预发验证通过后，在生产 `api-prod` 发布流程中执行同一批迁移，确保 schema 一致。  
+4. 所有迁移操作应记录在发布说明中，并遵守发布治理文档中的回滚策略。
 
 #### 备选（API 放在 Vercel Serverless 时）
 
