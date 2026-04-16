@@ -15,7 +15,7 @@ type UpdateStatusResponse = {
   updatedAt: string
 }
 
-const PROD_API_BASE_URL = 'https://api.yourdomain.com/api/v1'
+const PROD_API_BASE_URL = 'https://api.tailcarehub.com/api/v1'
 const DEV_API_BASE_URL = 'http://localhost:3001/api/v1'
 
 const API_BASE_URL =
