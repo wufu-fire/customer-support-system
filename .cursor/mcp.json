@@ -2,6 +2,13 @@
   "mcpServers": {
     "notion": {
       "url": "https://mcp.notion.com/mcp"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
     }
   }
 }
