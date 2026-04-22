@@ -20,6 +20,43 @@ enum AdminRole {
   admin
 }
 
+enum UserStatus {
+  active
+  disabled
+}
+
+model User {
+  id              String        @id @default(uuid()) @db.Uuid
+  email           String        @unique @db.VarChar(255)
+  passwordHash    String        @map("password_hash")
+  name            String?       @db.VarChar(120)
+  locale          String        @default("en-US") @db.VarChar(10)
+  emailVerifiedAt DateTime?     @map("email_verified_at") @db.Timestamptz(6)
+  status          UserStatus    @default(active)
+  lastLoginAt     DateTime?     @map("last_login_at") @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  sessions        AuthSession[]
+
+  @@map("users")
+}
+
+model AuthSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  refreshTokenHash String    @map("refresh_token_hash")
+  userAgent        String?   @map("user_agent") @db.VarChar(255)
+  ip               String?   @db.VarChar(64)
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_auth_sessions_user")
+  @@index([expiresAt], map: "idx_auth_sessions_expires_at")
+  @@map("auth_sessions")
+}
+
 model Product {
   id              String         @id @default(uuid()) @db.Uuid
   sku             String         @unique @db.VarChar(64)

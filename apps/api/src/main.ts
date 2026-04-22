@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -12,6 +13,7 @@ async function bootstrap() {
   const allowAllOrigins = corsOrigins.includes('*');
 
   app.setGlobalPrefix(apiPrefix);
+  app.use(cookieParser());
   app.enableCors({
     // Fail-closed: if CORS_ORIGINS is not configured, reject cross-origin requests.
     origin: allowAllOrigins ? true : corsOrigins.length > 0 ? corsOrigins : false,
