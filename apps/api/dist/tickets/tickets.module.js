@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TicketsModule = void 0;
 const common_1 = require("@nestjs/common");
+const admin_user_guard_1 = require("../auth/guards/admin-user.guard");
 const admin_tickets_controller_1 = require("./admin-tickets.controller");
 const tickets_controller_1 = require("./tickets.controller");
 const tickets_service_1 = require("./tickets.service");
@@ -17,7 +18,7 @@ exports.TicketsModule = TicketsModule;
 exports.TicketsModule = TicketsModule = __decorate([
     (0, common_1.Module)({
         controllers: [tickets_controller_1.TicketsController, admin_tickets_controller_1.AdminTicketsController],
-        providers: [tickets_service_1.TicketsService],
+        providers: [tickets_service_1.TicketsService, admin_user_guard_1.AdminUserGuard],
     })
 ], TicketsModule);
 //# sourceMappingURL=tickets.module.js.map

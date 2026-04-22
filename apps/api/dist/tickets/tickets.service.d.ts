@@ -26,7 +26,7 @@ export declare class TicketsService {
     constructor(prisma: PrismaService);
     create(dto: CreateTicketDto): Promise<CreateTicketResult>;
     track(dto: TrackTicketDto): Promise<TrackTicketResult>;
-    updateStatus(ticketId: string, dto: UpdateTicketStatusDto): Promise<UpdateTicketStatusResult>;
+    updateStatus(ticketId: string, dto: UpdateTicketStatusDto, changedByAdminId: string): Promise<UpdateTicketStatusResult>;
     private generateTicketNo;
 }
 export {};

@@ -150,15 +150,14 @@ export class TicketsService {
   async updateStatus(
     ticketId: string,
     dto: UpdateTicketStatusDto,
+    changedByAdminId: string,
   ): Promise<UpdateTicketStatusResult> {
-    if (dto.changedByAdminId) {
-      const admin = await this.prisma.adminUser.findUnique({
-        where: { id: dto.changedByAdminId },
-        select: { id: true },
-      });
-      if (!admin) {
-        throw new BadRequestException('Invalid changedByAdminId');
-      }
+    const admin = await this.prisma.adminUser.findUnique({
+      where: { id: changedByAdminId },
+      select: { id: true },
+    });
+    if (!admin) {
+      throw new BadRequestException('Invalid changedByAdminId');
     }
 
     const toStatus = dto.toStatus;
@@ -232,7 +231,7 @@ export class TicketsService {
             ticketId: ticket.id,
             fromStatus,
             toStatus,
-            changedByAdminId: dto.changedByAdminId ?? null,
+            changedByAdminId,
             comment: dto.comment?.trim() || null,
           },
         });

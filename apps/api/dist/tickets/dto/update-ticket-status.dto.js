@@ -17,7 +17,6 @@ const trimIfString = ({ value }) => typeof value === 'string' ? value.trim() : v
 class UpdateTicketStatusDto {
     toStatus;
     comment;
-    changedByAdminId;
 }
 exports.UpdateTicketStatusDto = UpdateTicketStatusDto;
 __decorate([
@@ -31,10 +30,4 @@ __decorate([
     (0, class_validator_1.MaxLength)(1000),
     __metadata("design:type", String)
 ], UpdateTicketStatusDto.prototype, "comment", void 0);
-__decorate([
-    (0, class_transformer_1.Transform)(trimIfString),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], UpdateTicketStatusDto.prototype, "changedByAdminId", void 0);
 //# sourceMappingURL=update-ticket-status.dto.js.map

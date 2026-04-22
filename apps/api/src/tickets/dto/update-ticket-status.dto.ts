@@ -4,7 +4,6 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
 } from 'class-validator';
 
@@ -20,9 +19,4 @@ export class UpdateTicketStatusDto {
   @IsString()
   @MaxLength(1000)
   comment?: string;
-
-  @Transform(trimIfString)
-  @IsOptional()
-  @IsUUID()
-  changedByAdminId?: string;
 }
